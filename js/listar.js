@@ -1,30 +1,25 @@
-// Função para listar os usuários
 async function listarUsuarios() {
-    // Obter o token do localStorage
     const token = localStorage.getItem('token');
     const userIdLogado = localStorage.getItem('userId');
 
     try {
         if (token) {
-            // Fazer uma requisição para a API protegida para obter os dados do usuário
             const response = await fetch('http://localhost:8000/api/user/listar', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
-            });            
-    
+            });
+
             if (response.ok) {
                 const usuarios = await response.json();
-    
-                // Seleciona o corpo da tabela
+
                 const tabelaUsuarios = document.getElementById('tabelaUsuarios');
-                tabelaUsuarios.innerHTML = ''; // Limpa a tabela
-    
-                // Itera sobre os usuários e adiciona cada um à tabela
+                tabelaUsuarios.innerHTML = '';
+
+                // Verifique se o caminho para os dados do usuário está correto
                 usuarios.user.data.forEach((usuario, index) => {
-                    
                     const dataCriacao = new Date(usuario.created_at);
                     const dataFormatada = dataCriacao.toLocaleString('pt-BR', {
                         day: '2-digit',
@@ -33,7 +28,7 @@ async function listarUsuarios() {
                         hour: '2-digit',
                         minute: '2-digit',
                         second: '2-digit',
-                        hour12: false // Formato 24 horas
+                        hour12: false
                     });
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -42,20 +37,35 @@ async function listarUsuarios() {
                         <td>${usuario.email}</td>
                         <td>${dataFormatada}</td>
                         <td>
+                            <button class="btn btn-info btn-sm visualizar-usuario" data-id="${usuario.id}">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        
                             ${
                                 usuario.id != userIdLogado
                                 ? `<button class="btn btn-danger btn-sm excluir-usuario" data-id="${usuario.id}">
                                     <i class="fas fa-trash-alt"></i>
                                    </button>`
                                 : ''
-                            } <!-- Mostra o botão de excluir apenas se o id for diferente -->
+                            }
+
+                            <button class="btn btn-edit btn-sm editar-usuario" data-id="${usuario.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
                         </td>
                     `;
                     tabelaUsuarios.appendChild(row);
-                    
                 });
 
-                // Adiciona o evento de clique para excluir o usuário
+                // Evento de clique para visualizar
+                document.querySelectorAll('.visualizar-usuario').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-id');
+                        window.location.href = `visualizar.html?userId=${userId}`;
+                    });
+                });
+
+                // Evento de clique para excluir
                 document.querySelectorAll('.excluir-usuario').forEach(button => {
                     button.addEventListener('click', async function() {
                         const userId = this.getAttribute('data-id');
@@ -65,11 +75,20 @@ async function listarUsuarios() {
                         }
                     });
                 });
+
+                // Evento de clique para editar os dados do usuário
+                document.querySelectorAll('.editar-usuario').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-id');
+                        window.location.href = `editar.html?userId=${userId}`;
+                    });
+                })
             } else {
+                const errorData = await response.json(); // Para verificar o erro
+                console.error('Erro ao buscar os usuários:', errorData);
                 throw new Error('Erro ao buscar os usuários');
             }
         } else {
-            // Redireciona para o login se o token não existir
             window.location.href = 'login.html';
         }
     } catch (error) {
@@ -80,29 +99,20 @@ async function listarUsuarios() {
     }
 }
 
-// Função para excluir o usuário
-async function excluirUsuario(userId) {
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch(`http://localhost:8000/api/user/deletar/${userId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
+// Função para deslogar
+function deslogar() {
+    // Remova o token e o userId do localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
 
-        if (response.ok) {
-            alert('Usuário excluído com sucesso!');
-            listarUsuarios(); // Recarregar a lista de usuários
-        } else {
-            throw new Error('Erro ao excluir o usuário');
-        }
-    } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao excluir o usuário.');
-    }
+    // Redireciona para a página de login
+    window.location.href = 'login.html';
 }
 
 // Chama a função para listar os usuários assim que a página for carregada
-document.addEventListener('DOMContentLoaded', listarUsuarios);
+document.addEventListener('DOMContentLoaded', () => {
+    listarUsuarios();
+    
+    // Adiciona o evento de clique para o botão de deslogar
+    document.getElementById('logoutBtn').addEventListener('click', deslogar);
+});
