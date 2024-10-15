@@ -1,7 +1,7 @@
 async function obterUsuarioDetalhes() {
     const token = localStorage.getItem('token');
     const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('userId'); // Obtém o userId da URL
+    const userId = urlParams.get('userId');
 
     console.log('Token:', token);
     console.log('User ID:', userId);
@@ -17,12 +17,11 @@ async function obterUsuarioDetalhes() {
             });
 
             if (response.ok) {
-                const usuario = await response.json(); // Recebe os dados do usuário
+                const usuario = await response.json(); 
 
                 const tabelaUsuario = document.getElementById('tabelaUsuario');
-                tabelaUsuario.innerHTML = ''; // Limpa a tabela
+                tabelaUsuario.innerHTML = '';
 
-                // Verifica se a estrutura de usuario.user existe
                 if (usuario.user) {
                     // Formata a data de criação
                     const dataCriacao = new Date(usuario.user.created_at);
@@ -36,7 +35,6 @@ async function obterUsuarioDetalhes() {
                         hour12: false
                     });
 
-                    // Preenche a tabela com os dados do usuário
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${usuario.user.id}</td>
@@ -53,7 +51,7 @@ async function obterUsuarioDetalhes() {
                 throw new Error('Erro ao buscar os detalhes do usuário');
             }
         } else {
-            window.location.href = 'login.html'; // Redireciona se não houver token ou userId
+            window.location.href = 'login.html';
         }
     } catch (error) {
         console.error('Erro:', error);
@@ -68,10 +66,8 @@ function exibirMensagemErro(mensagem) {
     mensagemErro.classList.remove('d-none');
 }
 
-// Chama a função para obter os detalhes do usuário assim que a página for carregada
 document.addEventListener('DOMContentLoaded', obterUsuarioDetalhes);
 
-// Evento para o botão Voltar
 document.getElementById('voltarBtn').addEventListener('click', function() {
-    window.history.back(); // Volta para a página anterior
+    window.history.back();
 });

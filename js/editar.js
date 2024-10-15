@@ -1,14 +1,13 @@
 async function obterUsuarioDetalhes() {
     const token = localStorage.getItem('token');
     const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('userId'); // Obtém o userId da URL
+    const userId = urlParams.get('userId');
 
     console.log('Token:', token);
     console.log('User ID:', userId);
 
     try {
         if (token && userId) {
-            // Altere o endpoint para o de visualização
             const response = await fetch(`http://localhost:8000/api/user/visualizar/${userId}`, {
                 method: 'GET',
                 headers: {
@@ -18,9 +17,7 @@ async function obterUsuarioDetalhes() {
             });
 
             if (response.ok) {
-                const usuario = await response.json(); // Recebe os dados do usuário
-
-                // Preenche os campos do formulário com os dados do usuário
+                const usuario = await response.json();
                 document.getElementById('nome').value = usuario.user.name;
                 document.getElementById('email').value = usuario.user.email;                
             } else {
@@ -28,7 +25,7 @@ async function obterUsuarioDetalhes() {
                 throw new Error('Erro ao buscar os detalhes do usuário');
             }
         } else {
-            window.location.href = 'login.html'; // Redireciona se não houver token ou userId
+            window.location.href = 'login.html';
         }
     } catch (error) {
         console.error('Erro:', error);
@@ -36,20 +33,18 @@ async function obterUsuarioDetalhes() {
     }
 }
 
-// Função para exibir mensagens de erro
 function exibirMensagemErro(mensagem) {
     const mensagemErro = document.getElementById('mensagemErro');
     mensagemErro.textContent = mensagem;
     mensagemErro.classList.remove('d-none');
 }
 
-// Função para salvar os dados atualizados
 async function salvarAlteracoes(event) {
     event.preventDefault();
 
     const token = localStorage.getItem('token');
     const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('userId'); // Obtém o userId da URL
+    const userId = urlParams.get('userId');
 
     const nome = document.getElementById('nome').value;
     const email = document.getElementById('email').value;
@@ -66,21 +61,19 @@ async function salvarAlteracoes(event) {
             });
 
             if (response.ok) {
-                window.location.href = 'listar.html'; // Redireciona para a lista após salvar
+                window.location.href = 'listar.html'; 
             } else {
                 const errorResponse = await response.json();
                 throw new Error('Erro ao atualizar os detalhes do usuário');
             }
         } else {
-            window.location.href = 'login.html'; // Redireciona se não houver token ou userId
+            window.location.href = 'login.html'; 
         }
     } catch (error) {
         console.error('Erro:', error);
         exibirMensagemErro('Erro ao salvar as alterações do usuário');
     }
 }
-
-// Inicializar os eventos e funções
 document.addEventListener('DOMContentLoaded', obterUsuarioDetalhes);
 document.getElementById('formEditarUsuario').addEventListener('submit', salvarAlteracoes);
 document.getElementById('voltarBtn').addEventListener('click', function() {
